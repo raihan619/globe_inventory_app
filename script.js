@@ -297,7 +297,7 @@ async function cutFabric(rollId, lengthToCut) {
 
         // Perform the cut - Update Firestore document
         const newCurrentLength = Math.round((roll.currentLength - cutLength) * 100) / 100;
-        const newStatus = newCurrentLength === 0 ? "No Stock" : "Cut"; // Determine new status
+        const newStatus = newCurrentLength === 0 ? "Out of Stock" : "Cut"; // Determine new status
 
         await rollRef.update({
             currentLength: newCurrentLength,
@@ -305,13 +305,13 @@ async function cutFabric(rollId, lengthToCut) {
         });
 
         console.log(`Cut ${cutLength}m from roll ${rollId}. New current length: ${newCurrentLength}`);
-        const logMessage = newStatus === "No Stock"
-            ? `Roll ID: ${rollId.substring(0,6)}... (${roll.name}), Cut: ${cutLength}m. Roll has no stock.`
+        const logMessage = newStatus === "Out of Stock"
+            ? `Roll ID: ${rollId.substring(0,6)}... (${roll.name}), Cut: ${cutLength}m. Roll is out of stock.`
             : `Roll ID: ${rollId.substring(0,6)}... (${roll.name}), Cut: ${cutLength}m, Remaining: ${newCurrentLength}m`;
         await logActivity("Fabric Cut", logMessage);
 
-        const statusMessage = newStatus === "No Stock"
-            ? `Successfully cut ${cutLength}m from Roll (${roll.name}). Roll now has no stock.`
+        const statusMessage = newStatus === "Out of Stock"
+            ? `Successfully cut ${cutLength}m from Roll (${roll.name}). Roll is now out of stock.`
             : `Successfully cut ${cutLength}m from Roll (${roll.name}). Remaining: ${newCurrentLength}m.`;
         statusP.textContent = statusMessage;
         statusP.style.color = 'green';
