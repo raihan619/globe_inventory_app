@@ -144,7 +144,7 @@ function setupInventoryListener() {
             table.innerHTML = `
                 <thead>
                     <tr>
-                        <th>S/N</th> <!-- Added Serial Number Header -->
+                        <th>S/N</th>
                         <th>Name</th>
                         <th>Design</th>
                         <th>Colour</th>
@@ -152,6 +152,7 @@ function setupInventoryListener() {
                         <th>Current Length (m)</th>
                         <th>Status</th>
                         <th>ID</th>
+                        <th>Actions</th> <!-- Added Actions Header -->
                     </tr>
                 </thead>
                 <tbody>
@@ -168,14 +169,15 @@ function setupInventoryListener() {
 
                 const row = tbody.insertRow();
                 row.innerHTML = `
-                    <td>${serialNumber}</td> <!-- Use counter for Serial Number -->
+                    <td>${serialNumber}</td>
                     <td>${item.name}</td>
                     <td>${item.design}</td>
                     <td>${item.colour}</td>
                     <td>${formatLength(item.originalLength)}</td>
                     <td>${formatLength(item.currentLength)}</td>
                     <td>${item.status}</td>
-                    <td>${item.id.substring(0, 6)}...</td> <!-- Show partial ID -->
+                    <td>${item.id.substring(0, 6)}...</td>
+                    <td><button class="edit-btn" data-id="${item.id}"><i class="fas fa-edit"></i> Edit</button></td> <!-- Added Edit Button -->
                 `;
             });
 
@@ -397,6 +399,8 @@ async function handleExcelUpload() {
                     status = 'Full';
                 } else if (lowerStatus === 'cut' || lowerStatus === 'partial') {
                     status = 'Cut';
+                } else if (lowerStatus === 'out of stock' || lowerStatus === 'empty' || lowerStatus === 'no stock') {
+                    status = 'Out of Stock'; // Standardize empty status
                 } else {
                     // If status is unrecognized, maybe default based on lengths?
                     if (!isNaN(currentLength) && !isNaN(originalLength) && currentLength === originalLength) {
@@ -482,6 +486,187 @@ async function handleExcelUpload() {
     reader.readAsArrayBuffer(file); // Read file as ArrayBuffer for SheetJS
 }
 
+// --- Edit Item Functionality ---
+// Function to open the modal and populate form
+async function openEditModal(itemId) {
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-item-form');
+    const editStatusP = document.getElementById('edit-status');
+
+    if (!editModal || !editForm || !editStatusP) {
+        console.error("Edit modal elements not found!");
+        return;
+    }
+    editStatusP.textContent = ''; // Clear previous status
+    editForm.reset(); // Reset form fields
+    // Ensure buttons are enabled when opening
+    const saveBtn = editForm.querySelector('button[type="submit"]');
+    const deleteBtn = document.getElementById('delete-item-btn');
+    if(saveBtn) saveBtn.disabled = false;
+    if(deleteBtn) deleteBtn.disabled = false;
+
+
+    try {
+        const docRef = inventoryCollection.doc(itemId);
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists) {
+            const item = docSnap.data();
+            // Populate the form
+            document.getElementById('edit-item-id').value = itemId;
+            document.getElementById('edit-item-name').value = item.name;
+            document.getElementById('edit-item-design').value = item.design;
+            document.getElementById('edit-item-colour').value = item.colour;
+            document.getElementById('edit-original-length').value = item.originalLength;
+            document.getElementById('edit-current-length').value = item.currentLength;
+            document.getElementById('edit-item-status').value = item.status;
+
+            editModal.style.display = "block"; // Show the modal
+        } else {
+            console.error("No such document!");
+            alert("Error: Could not find the item to edit."); // Inform user
+        }
+    } catch (error) {
+        console.error("Error getting document:", error);
+        alert("Error fetching item details. Please try again.");
+    }
+}
+
+// Function to close the modal
+function closeEditModal() {
+    const editModal = document.getElementById('edit-modal');
+    if (editModal) {
+        editModal.style.display = "none";
+    }
+}
+
+// Function to handle saving edited item
+async function handleEditFormSubmit(event) {
+    event.preventDefault();
+    const editStatusP = document.getElementById('edit-status');
+    const saveBtn = document.querySelector('#edit-item-form button[type="submit"]');
+    const deleteBtn = document.getElementById('delete-item-btn');
+
+    editStatusP.textContent = 'Saving...';
+    editStatusP.style.color = 'orange';
+    if(saveBtn) saveBtn.disabled = true;
+    if(deleteBtn) deleteBtn.disabled = true;
+
+
+    const itemId = document.getElementById('edit-item-id').value;
+    const originalLength = parseFloat(document.getElementById('edit-original-length').value);
+    const currentLength = parseFloat(document.getElementById('edit-current-length').value);
+    let status = document.getElementById('edit-item-status').value; // Use let for potential modification
+    const name = document.getElementById('edit-item-name').value.trim();
+    const design = document.getElementById('edit-item-design').value.trim();
+    const colour = document.getElementById('edit-item-colour').value.trim();
+
+    // Basic Validation
+    if (!itemId || !name || !design || !colour || !status || isNaN(originalLength) || originalLength <= 0 || isNaN(currentLength) || currentLength < 0) {
+        editStatusP.textContent = 'Error: Please fill all fields with valid values (Lengths must be numbers, Original > 0).';
+        editStatusP.style.color = 'red';
+        if(saveBtn) saveBtn.disabled = false; // Re-enable on validation error
+        if(deleteBtn) deleteBtn.disabled = false;
+        return;
+    }
+    if (currentLength > originalLength) {
+         editStatusP.textContent = 'Error: Current Length cannot be greater than Original Length.';
+         editStatusP.style.color = 'red';
+         if(saveBtn) saveBtn.disabled = false; // Re-enable on validation error
+         if(deleteBtn) deleteBtn.disabled = false;
+         return;
+    }
+     // Auto-correct status based on length if inconsistent
+     if (currentLength === 0 && status !== "Out of Stock") {
+         console.warn("Correcting status to 'Out of Stock' because current length is 0.");
+         status = "Out of Stock";
+         document.getElementById('edit-item-status').value = status; // Update dropdown visually
+     } else if (currentLength > 0 && status === "Out of Stock") {
+         console.warn("Correcting status from 'Out of Stock' because current length is > 0.");
+         status = currentLength === originalLength ? "Full" : "Cut"; // Determine correct status
+         document.getElementById('edit-item-status').value = status; // Update dropdown visually
+     }
+
+
+    const itemUpdates = {
+        name: name,
+        design: design,
+        colour: colour,
+        originalLength: originalLength,
+        currentLength: currentLength,
+        status: status
+        // addedAt should not be updated
+    };
+
+    try {
+        const docRef = inventoryCollection.doc(itemId);
+        await docRef.update(itemUpdates);
+
+        editStatusP.textContent = 'Changes saved successfully!';
+        editStatusP.style.color = 'green';
+        await logActivity("Item Edited", `ID: ${itemId.substring(0,6)}..., Name: ${name}, Design: ${design}, Colour: ${colour}, Current: ${currentLength}m, Original: ${originalLength}m, Status: ${status}`);
+
+        // Close modal after a short delay
+        setTimeout(closeEditModal, 1500);
+
+    } catch (error) {
+        console.error("Error updating document: ", error);
+        editStatusP.textContent = 'Error saving changes. Please try again.';
+        editStatusP.style.color = 'red';
+        if(saveBtn) saveBtn.disabled = false; // Re-enable on save error
+        if(deleteBtn) deleteBtn.disabled = false;
+    }
+}
+
+// Function to handle deleting an item
+async function handleDeleteItem() {
+    const itemId = document.getElementById('edit-item-id').value;
+    const editStatusP = document.getElementById('edit-status');
+    const itemName = document.getElementById('edit-item-name').value; // Get name for confirmation message
+    const saveBtn = document.querySelector('#edit-item-form button[type="submit"]');
+    const deleteBtn = document.getElementById('delete-item-btn');
+
+
+    if (!itemId) {
+        alert("Error: Cannot identify item to delete.");
+        return;
+    }
+
+    // Confirmation dialog
+    const confirmation = confirm(`Are you sure you want to permanently delete item "${itemName}" (ID: ${itemId.substring(0,6)}...)? This action cannot be undone.`);
+
+    if (confirmation) {
+        editStatusP.textContent = 'Deleting...';
+        editStatusP.style.color = 'orange';
+        if(deleteBtn) deleteBtn.disabled = true; // Disable button during delete
+        if(saveBtn) saveBtn.disabled = true; // Disable save button too
+
+        try {
+            const docRef = inventoryCollection.doc(itemId);
+            await docRef.delete();
+
+            editStatusP.textContent = 'Item deleted successfully!';
+            editStatusP.style.color = 'green';
+            await logActivity("Item Deleted", `Deleted item ID: ${itemId.substring(0,6)}... (${itemName})`);
+
+            // Close modal after a short delay
+            setTimeout(closeEditModal, 1500);
+
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+            editStatusP.textContent = 'Error deleting item. Please try again.';
+            editStatusP.style.color = 'red';
+            // Re-enable buttons on error
+            if(deleteBtn) deleteBtn.disabled = false;
+            if(saveBtn) saveBtn.disabled = false;
+        }
+    } else {
+        // User cancelled
+        editStatusP.textContent = 'Deletion cancelled.';
+        editStatusP.style.color = 'grey';
+    }
+}
+
 
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -529,6 +714,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const excelFileInput = document.getElementById('excel-file');
     const uploadExcelBtn = document.getElementById('upload-excel-btn');
     const uploadStatusP = document.getElementById('upload-status');
+    // Get Edit Modal Elements
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-item-form');
+    const closeModalBtn = document.querySelector('.modal .close-btn');
+    const inventoryListDiv = document.getElementById('inventory-list'); // Get inventory list container
+    const deleteItemBtn = document.getElementById('delete-item-btn'); // Get delete button
 
 
     // --- Add Item Form: "Is Full Roll?" Checkbox Listener ---
@@ -773,5 +964,44 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Upload Excel button not found!");
     }
     // --- End Excel Upload Listener ---
+
+    // --- Edit Modal Event Listeners ---
+    // Event listener for edit buttons (using event delegation on the inventory list)
+    if (inventoryListDiv) { // Check if inventoryListDiv exists
+        inventoryListDiv.addEventListener('click', (event) => {
+            if (event.target.closest('.edit-btn')) { // Check if the click was on an edit button or its icon
+                const button = event.target.closest('.edit-btn');
+                const itemId = button.dataset.id;
+                if (itemId) {
+                    openEditModal(itemId);
+                }
+            }
+        });
+    }
+
+    // Listener for closing the modal via the 'x' button
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeEditModal);
+    }
+
+    // Close modal if user clicks outside the modal content
+    if (editModal) {
+        window.addEventListener('click', (event) => {
+            if (event.target == editModal) {
+                closeEditModal();
+            }
+        });
+    }
+
+    // Listener for submitting the edit form
+    if (editForm) {
+        editForm.addEventListener('submit', handleEditFormSubmit);
+    }
+
+    // Listener for the delete button inside the modal
+    if (deleteItemBtn) {
+        deleteItemBtn.addEventListener('click', handleDeleteItem);
+    }
+    // --- End Edit Modal Listeners ---
 
 }); // End DOMContentLoaded

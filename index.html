@@ -123,5 +123,43 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <script src="script.js"></script>
+
+    <!-- Edit Item Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Edit Inventory Item</h2>
+            <form id="edit-item-form">
+                <input type="hidden" id="edit-item-id"> <!-- To store the document ID -->
+
+                <label for="edit-item-name">Name:</label>
+                <input type="text" id="edit-item-name" name="edit-item-name" required><br><br>
+
+                <label for="edit-item-design">Design:</label>
+                <input type="text" id="edit-item-design" name="edit-item-design" required><br><br>
+
+                <label for="edit-item-colour">Colour:</label>
+                <input type="text" id="edit-item-colour" name="edit-item-colour" required><br><br>
+
+                <label for="edit-original-length">Original Length (m):</label>
+                <input type="number" id="edit-original-length" name="edit-original-length" step="any" required><br><br>
+
+                <label for="edit-current-length">Current Length (m):</label>
+                <input type="number" id="edit-current-length" name="edit-current-length" step="any" required><br><br>
+
+                <label for="edit-item-status">Status:</label>
+                <select id="edit-item-status" name="edit-item-status" required>
+                    <option value="Full">Full</option>
+                    <option value="Cut">Cut</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                    <!-- Add other statuses if needed -->
+                </select><br><br>
+
+                <button type="submit"><i class="fas fa-save"></i> Save Changes</button>
+                <button type="button" id="delete-item-btn" style="background-color: #dc3545; margin-left: 10px;"><i class="fas fa-trash-alt"></i> Delete Item</button> <!-- Added Delete Button -->
+                <p id="edit-status" style="margin-top: 10px;"></p>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
