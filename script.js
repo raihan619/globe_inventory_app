@@ -144,6 +144,7 @@ function setupInventoryListener() {
             table.innerHTML = `
                 <thead>
                     <tr>
+                        <th>S/N</th> <!-- Added Serial Number Header -->
                         <th>Name</th>
                         <th>Design</th>
                         <th>Colour</th>
@@ -158,13 +159,16 @@ function setupInventoryListener() {
             `;
             const tbody = table.querySelector('tbody');
 
-            snapshot.forEach(doc => {
+            let serialNumber = 0; // Initialize counter
+            snapshot.forEach(doc => { // Remove index parameter
+                serialNumber++; // Increment counter for each row
                 const item = doc.data();
                 item.id = doc.id; // Add Firestore document ID to the item object
                 currentInventoryData.push(item); // Add to global list
 
                 const row = tbody.insertRow();
                 row.innerHTML = `
+                    <td>${serialNumber}</td> <!-- Use counter for Serial Number -->
                     <td>${item.name}</td>
                     <td>${item.design}</td>
                     <td>${item.colour}</td>
