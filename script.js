@@ -297,14 +297,23 @@ async function cutFabric(rollId, lengthToCut) {
 
         // Perform the cut - Update Firestore document
         const newCurrentLength = Math.round((roll.currentLength - cutLength) * 100) / 100;
+        const newStatus = newCurrentLength === 0 ? "No Stock" : "Cut"; // Determine new status
+
         await rollRef.update({
             currentLength: newCurrentLength,
-            status: "Cut" // Mark the roll as cut (even if it was already cut)
+            status: newStatus // Update status based on remaining length
         });
 
         console.log(`Cut ${cutLength}m from roll ${rollId}. New current length: ${newCurrentLength}`);
-        await logActivity("Fabric Cut", `Roll ID: ${rollId.substring(0,6)}... (${roll.name}), Cut: ${cutLength}m, Remaining: ${newCurrentLength}m`);
-        statusP.textContent = `Successfully cut ${cutLength}m from Roll (${roll.name}). Remaining: ${newCurrentLength}m.`;
+        const logMessage = newStatus === "No Stock"
+            ? `Roll ID: ${rollId.substring(0,6)}... (${roll.name}), Cut: ${cutLength}m. Roll has no stock.`
+            : `Roll ID: ${rollId.substring(0,6)}... (${roll.name}), Cut: ${cutLength}m, Remaining: ${newCurrentLength}m`;
+        await logActivity("Fabric Cut", logMessage);
+
+        const statusMessage = newStatus === "No Stock"
+            ? `Successfully cut ${cutLength}m from Roll (${roll.name}). Roll now has no stock.`
+            : `Successfully cut ${cutLength}m from Roll (${roll.name}). Remaining: ${newCurrentLength}m.`;
+        statusP.textContent = statusMessage;
         statusP.style.color = 'green';
         return true; // Indicate success
 
