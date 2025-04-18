@@ -1,0 +1,395 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Clean, readable font */
+    background-color: #f4f7f6; /* Light background */
+    color: #333; /* Default text color */
+    margin: 0;
+    padding: 0; /* Remove body padding, apply to main content */
+    line-height: 1.6;
+}
+
+/* Navigation Bar */
+.top-nav {
+    background-color: #005a9c; /* Primary blue background */
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky; /* Keep nav visible on scroll */
+    top: 0;
+    z-index: 1000; /* Ensure nav stays on top */
+}
+
+.top-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center; /* Center nav items */
+}
+
+.top-nav ul li {
+    display: inline-block; /* Arrange items horizontally */
+    margin: 0 15px;
+}
+
+.top-nav ul li a {
+    color: #ffffff; /* White text */
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+    font-weight: bold;
+}
+
+.top-nav ul li a:hover,
+.top-nav ul li a.active { /* Style for hover and active link */
+    background-color: #007bff; /* Lighter blue for active/hover */
+}
+
+/* Main Content Area */
+.main-content {
+    padding: 20px; /* Add padding here instead of body */
+    margin-top: 60px; /* Add margin to prevent overlap with sticky nav (adjust height as needed) */
+}
+
+/* Tab Panel Styling */
+.tab-panel {
+    display: none; /* Hide inactive panels by default */
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.tab-panel.active-panel {
+    display: block; /* Show the active panel */
+}
+
+/* Adjustments for elements moved inside panels */
+#inventory-panel div#inventory-list,
+#inventory-panel div#cut-fabric-form,
+#inventory-panel form#add-item-form {
+    background-color: transparent; /* Remove background from inner elements */
+    padding: 0; /* Remove padding from inner elements */
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 0; /* Remove margin from inner elements */
+}
+
+#inventory-panel h2 { /* Style subheadings within inventory panel */
+    margin-top: 30px; /* Add space above subheadings */
+    border-bottom: none; /* Remove border from subheadings */
+    font-size: 1.3em;
+}
+#inventory-panel h2:first-of-type { /* No top margin for the first heading */
+     margin-top: 0;
+}
+
+/* Search Results List Styling (Dashboard) */
+#search-results-list {
+    margin-top: 20px;
+    max-height: 300px; /* Limit height and make scrollable if needed */
+    overflow-y: auto; /* Add scroll if content exceeds max-height */
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 0; /* Remove padding for list items */
+}
+
+#search-results-list .result-item { /* Style for each item in the results */
+    padding: 8px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95em;
+}
+
+#search-results-list .result-item:last-child {
+    border-bottom: none;
+}
+
+#search-results-list .no-results { /* Style for the 'no results' message */
+    padding: 15px;
+    font-style: italic;
+    color: #6c757d;
+    text-align: center;
+}
+
+#search-results-list:empty { /* Hide the container if completely empty */
+    display: none;
+    border: none; /* Also hide border when empty */
+}
+
+h1, h2 {
+    color: #005a9c; /* Primary blue for headings */
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 30px 0;
+}
+
+/* Remove old container styles as panels handle this now */
+/*
+div#inventory-list,
+div#cut-fabric-form,
+form#add-item-form {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+*/
+
+/* Form Styling */
+label {
+    display: block; /* Each label on its own line */
+    font-weight: bold; /* Important fields bold */
+    margin-bottom: 8px;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: calc(100% - 22px); /* Adjust width considering padding/border */
+    padding: 10px;
+    margin-bottom: 15px; /* Spacing between fields */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in element's total width/height */
+    font-size: 1rem;
+}
+
+select {
+     width: 100%; /* Select needs full width */
+}
+
+input:focus,
+select:focus {
+    border-color: #007bff; /* Highlight focus */
+    outline: none;
+}
+
+/* Checkbox Styling */
+.checkbox-container {
+    display: flex;
+    align-items: center; /* Vertically align checkbox and label */
+    margin-bottom: 15px; /* Consistent spacing */
+}
+
+input[type="checkbox"] {
+    width: auto; /* Override default width */
+    margin-right: 8px; /* Space between checkbox and label */
+    margin-bottom: 0; /* Remove bottom margin */
+    flex-shrink: 0; /* Prevent checkbox from shrinking */
+    position: relative;
+    top: -1px; /* Minor vertical adjustment */
+}
+
+label.inline-label {
+    display: inline-block; /* Allow label next to checkbox */
+    font-weight: normal; /* Normal weight for checkbox label */
+    margin-bottom: 0; /* Remove bottom margin */
+    color: #555;
+    cursor: pointer;
+}
+
+/* Button Styling */
+button {
+    background-color: #007bff; /* Accent blue for primary actions */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease-in-out;
+    margin-right: 10px; /* Space between buttons */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Specific Button Styles */
+#remove-quantity-btn {
+    background-color: #dc3545; /* Red accent for potentially destructive action */
+}
+
+#remove-quantity-btn:hover {
+    background-color: #c82333;
+}
+
+/* Status Messages */
+#update-status,
+#add-status {
+    margin-top: 15px;
+    font-style: italic;
+    color: #666;
+}
+
+/* Search Container Styling */
+.search-container {
+    background-color: #ffffff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+    display: flex; /* Align label and input */
+    align-items: center;
+}
+
+.search-container label {
+    margin-bottom: 0; /* Remove bottom margin for inline alignment */
+    margin-right: 15px; /* Space between label and input */
+    flex-shrink: 0; /* Prevent label from shrinking */
+}
+
+#search-inventory {
+    flex-grow: 1; /* Allow input to take remaining space */
+    margin-bottom: 0; /* Remove default bottom margin */
+}
+
+/* Inventory List Table Styling */
+#inventory-list table {
+    width: 100%;
+    border-collapse: collapse; /* Remove spacing between borders */
+    margin-top: 15px; /* Add some space above the table */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow */
+}
+
+#inventory-list th,
+#inventory-list td {
+    border: 1px solid #ddd; /* Light grey border for cells */
+    padding: 12px 15px; /* Add padding within cells */
+    text-align: left; /* Align text to the left */
+    vertical-align: middle; /* Align content vertically */
+}
+
+#inventory-list th {
+    background-color: #e9ecef; /* Light background for headers */
+    color: #495057; /* Darker text for headers */
+    font-weight: bold; /* Bold header text */
+    text-transform: uppercase; /* Uppercase headers */
+    font-size: 0.9em;
+}
+
+#inventory-list tbody tr:nth-child(even) {
+    background-color: #f8f9fa; /* Zebra striping for even rows */
+}
+
+#inventory-list tbody tr:hover {
+    background-color: #e2e6ea; /* Highlight row on hover */
+}
+
+/* Style for the empty inventory message */
+#inventory-list p {
+    font-style: italic;
+    color: #6c757d;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Activity Log Styling */
+#activity-log-list {
+    margin-top: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    max-height: 500px; /* Limit height */
+    overflow-y: auto; /* Add scrollbar if needed */
+}
+
+.log-entry {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-entry .timestamp {
+    display: block;
+    font-size: 0.85em;
+    color: #6c757d; /* Grey for timestamp */
+    margin-bottom: 3px;
+}
+
+.log-entry .action {
+    font-weight: bold;
+    color: #005a9c; /* Use primary blue for action */
+}
+
+.log-entry .details {
+    margin-left: 10px;
+    color: #333;
+}
+
+/* Responsive adjustments (optional basic example) */
+@media (max-width: 768px) { /* Adjust breakpoint */
+     .top-nav ul li {
+        margin: 0 8px; /* Reduce spacing on smaller screens */
+    }
+     .top-nav ul li a {
+        padding: 6px 10px;
+    }
+    .main-content {
+        padding: 15px;
+        margin-top: 55px; /* Adjust margin for potentially smaller nav */
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+
+    .search-container {
+        flex-direction: column; /* Stack label and input */
+        align-items: stretch;
+        padding: 15px;
+    }
+    .search-container label {
+        margin-bottom: 8px; /* Add margin back for stacked layout */
+        margin-right: 0;
+    }
+    .tab-panel {
+        padding: 15px;
+    }
+    /* Remove specific padding for inner elements on mobile */
+    #inventory-panel div#inventory-list,
+    #inventory-panel div#cut-fabric-form,
+    #inventory-panel form#add-item-form {
+        padding: 0;
+    }
+
+    button {
+        width: 100%;
+        margin-top: 10px;
+        margin-right: 0;
+        margin-left: 0; /* Ensure full width */
+    }
+    .top-nav {
+        padding: 8px 10px;
+    }
+    .top-nav ul li {
+        display: block; /* Stack nav items vertically */
+        margin: 5px 0;
+        text-align: center;
+    }
+     .main-content {
+         margin-top: 160px; /* Adjust significantly for stacked nav */
+     }
+}

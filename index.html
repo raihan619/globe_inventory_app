@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curtain Inventory</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <nav class="top-nav">
+        <ul>
+            <li><a href="#dashboard" class="active">Dashboard</a></li>
+            <li><a href="#inventory">Inventory</a></li>
+            <li><a href="#orders">Orders</a></li>
+            <li><a href="#reports">Reports</a></li>
+        </ul>
+    </nav>
+    <div class="main-content"> <!-- This div will now contain the tab panels -->
+        <h1>Curtain Inventory Management</h1>
+
+        <!-- Tab Panels -->
+        <div id="dashboard-panel" class="tab-panel active-panel"> <!-- Dashboard initially active -->
+            <h2>Dashboard</h2>
+            <!-- Search Section -->
+            <div class="search-container">
+                <label for="search-inventory">Search Inventory:</label>
+                <input type="text" id="search-inventory" placeholder="Enter Name, Design, or Colour...">
+            </div>
+            <div id="search-results-list"> <!-- Changed ID -->
+                <!-- Search results summary will be displayed here by JS -->
+            </div>
+            <p><i>Full inventory details are available on the Inventory tab.</i></p>
+        </div>
+
+        <div id="inventory-panel" class="tab-panel"> <!-- Inventory Panel (initially hidden) -->
+            <h2>Inventory Details</h2>
+            <div id="inventory-list">
+    <!-- Inventory items will be displayed here -->
+            </div> <!-- Close inventory-list -->
+
+            <hr>
+
+            <!-- Updated Add Item Form -->
+            <h2>Add New Item (Roll or Cut Piece)</h2>
+            <form id="add-item-form">
+                <label for="item-name">Name:</label>
+                <input type="text" id="item-name" name="item-name" required><br><br>
+
+                <label for="item-design">Design:</label>
+                <input type="text" id="item-design" name="item-design" required><br><br>
+
+                <label for="item-colour">Colour:</label>
+                <input type="text" id="item-colour" name="item-colour" required><br><br>
+
+                <label for="current-length">Roll Length (m):</label> <!-- Changed to Roll Length -->
+                <input type="number" id="current-length" name="current-length" step="any" required><br><br>
+
+                <div class="checkbox-container">
+                     <input type="checkbox" id="is-full-roll" name="is-full-roll" checked> <!-- Changed ID, default to checked -->
+                     <label for="is-full-roll" class="inline-label">Full Roll</label> <!-- Changed label -->
+                </div>
+                <br>
+
+                <div id="original-length-container" style="display: none;"> <!-- Still hidden by default, shown if NOT a full roll -->
+                    <label for="original-length">Original Roll Length (m) <small>(Required if NOT a full roll)</small>:</label> <!-- Adjusted label text -->
+                    <input type="number" id="original-length" name="original-length" step="any"><br><br> <!-- Not required initially -->
+                </div>
+
+                <button type="submit"><i class="fas fa-plus"></i> Add Item</button> <!-- Updated Button Text -->
+                <p id="add-status"></p>
+            </form>
+
+            <hr>
+
+            <!-- Move Cut Fabric Form Here -->
+            <h2>Cut Fabric from Roll</h2>
+            <div id="cut-fabric-form">
+                <label for="item-select">Select Roll:</label>
+                <select id="item-select" name="item-select">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+
+                <label for="length-to-cut">Length to Cut (m):</label>
+                <input type="number" id="length-to-cut" name="length-to-cut" step="any" required>
+
+                <button id="cut-fabric-btn"><i class="fas fa-cut"></i> Cut Fabric</button>
+                <p id="update-status"></p>
+            </div>
+            <hr>
+
+            <h2>Bulk Upload from Excel</h2>
+            <div id="upload-section">
+                <label for="excel-file">Select File (.xlsx or .csv):</label>
+                <input type="file" id="excel-file" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, .csv, text/csv" style="margin-right: 10px;">
+                <a href="inventory_template.csv" download="inventory_template.csv" style="margin-right: 10px;"><i class="fas fa-download"></i> Download Template (.csv)</a>
+                <button id="upload-excel-btn"><i class="fas fa-upload"></i> Upload Inventory</button>
+                <p id="upload-status"></p> <!-- To display upload progress/results -->
+            </div>
+
+
+        </div> <!-- Close inventory-panel -->
+
+        <div id="orders-panel" class="tab-panel">
+             <h2>Orders</h2>
+             <p>Orders section coming soon...</p>
+        </div>
+
+        <div id="reports-panel" class="tab-panel">
+             <h2>Activity Log</h2>
+             <div id="activity-log-list">
+                 <!-- Log entries will be displayed here by JS -->
+             </div>
+        </div>
+
+<!-- Removed the forms from their original positions -->
+
+    </div> <!-- Close main-content -->
+    <!-- Firebase SDK (Software Development Kit) - Compatibility Version -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <!-- SheetJS Library for Excel Parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
