@@ -580,20 +580,66 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
 
-        // Display the filtered results
+        // Group results by Name-Design-Colour
+        const groupedResults = {};
         if (filteredInventory.length > 0) {
             filteredInventory.forEach(item => {
-                const resultItem = document.createElement('div');
-                resultItem.classList.add('result-item');
-                resultItem.dataset.rollId = item.id; // Store the Firestore document ID
-                resultItem.style.cursor = 'pointer';
-                resultItem.setAttribute('title', 'Click to select this roll for cutting');
+                const groupKey = `${item.name}-${item.design}-${item.colour}`;
+                if (!groupedResults[groupKey]) {
+                    groupedResults[groupKey] = {
+                        name: item.name,
+                        design: item.design,
+                        colour: item.colour,
+                        items: [],
+                        totalLength: 0
+                    };
+                }
+                groupedResults[groupKey].items.push(item);
+                // Ensure currentLength is a number before adding
+                const length = typeof item.currentLength === 'number' ? item.currentLength : 0;
+                groupedResults[groupKey].totalLength += length;
+            });
+        }
 
-                // Display relevant info
-                resultItem.textContent = `ID: ${item.id.substring(0,6)}... | ${item.name} - ${item.design} - ${item.colour} | Current: ${formatLength(item.currentLength)}m (${item.status})`;
-                searchResultsListDiv.appendChild(resultItem);
+        // Display grouped results
+        if (Object.keys(groupedResults).length > 0) {
+            // Sort groups alphabetically (optional)
+            const sortedGroupKeys = Object.keys(groupedResults).sort();
+
+            sortedGroupKeys.forEach(key => {
+                const group = groupedResults[key];
+
+                // Create group header/summary
+                const groupHeader = document.createElement('div');
+                groupHeader.classList.add('search-group-header');
+                groupHeader.style.fontWeight = 'bold';
+                groupHeader.style.marginTop = '15px';
+                groupHeader.style.marginBottom = '5px';
+                groupHeader.textContent = `${group.name} - ${group.design} - ${group.colour}: Total ${formatLength(group.totalLength)}m (${group.items.length} item(s))`;
+                searchResultsListDiv.appendChild(groupHeader);
+
+                // Create container for items within the group
+                const groupItemsContainer = document.createElement('div');
+                groupItemsContainer.classList.add('search-group-items');
+                groupItemsContainer.style.marginLeft = '20px'; // Indent items
+                searchResultsListDiv.appendChild(groupItemsContainer);
+
+                // Display individual items in the group
+                group.items.forEach(item => {
+                    const resultItem = document.createElement('div');
+                    resultItem.classList.add('result-item');
+                    resultItem.dataset.rollId = item.id; // Store the Firestore document ID
+                    resultItem.style.cursor = 'pointer';
+                    resultItem.style.marginBottom = '3px'; // Small space between items
+                    resultItem.setAttribute('title', 'Click to select this roll for cutting');
+
+                    // Display relevant info for individual item
+                    resultItem.textContent = `ID: ${item.id.substring(0,6)}... | Current: ${formatLength(item.currentLength)}m (${item.status})`;
+                    groupItemsContainer.appendChild(resultItem);
+                });
             });
         } else {
+            // Display 'no results' message if filteredInventory was empty
             const noResultsMessage = document.createElement('div');
             noResultsMessage.classList.add('no-results');
             noResultsMessage.textContent = 'No items match your search.';
