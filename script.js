@@ -700,6 +700,37 @@ function populateDatalist(datalist, items) {
     });
 }
 
+// Function to dynamically update suggestions based on dependencies
+function updateDependentSuggestions() {
+    const nameInput = document.getElementById('item-name').value.trim();
+    const designInput = document.getElementById('item-design').value.trim();
+
+    const designSuggestions = document.getElementById('design-suggestions');
+    const colourSuggestions = document.getElementById('colour-suggestions');
+
+    const filteredDesigns = new Set();
+    const filteredColours = new Set();
+
+    currentInventoryData.forEach(item => {
+        if (item.name === nameInput) {
+            if (item.design) filteredDesigns.add(item.design);
+            if (item.design === designInput && item.colour) {
+                filteredColours.add(item.colour);
+            }
+        }
+    });
+
+    populateDatalist(designSuggestions, filteredDesigns);
+    populateDatalist(colourSuggestions, filteredColours);
+}
+
+// Add event listeners to update suggestions dynamically
+const nameInputField = document.getElementById('item-name');
+const designInputField = document.getElementById('item-design');
+
+nameInputField.addEventListener('input', updateDependentSuggestions);
+designInputField.addEventListener('input', updateDependentSuggestions);
+
 document.addEventListener('DOMContentLoaded', populateSuggestions);
 
 // --- Event Listeners ---
