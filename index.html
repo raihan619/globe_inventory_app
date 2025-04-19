@@ -40,13 +40,16 @@
             <h2>Add New Item (Roll or Cut Piece)</h2>
             <form id="add-item-form">
                 <label for="item-name">Name:</label>
-                <input type="text" id="item-name" name="item-name" required><br><br>
+                <input type="text" id="item-name" name="item-name" list="name-suggestions" required>
+                <datalist id="name-suggestions"></datalist><br><br>
 
                 <label for="item-design">Design:</label>
-                <input type="text" id="item-design" name="item-design" required><br><br>
+                <input type="text" id="item-design" name="item-design" list="design-suggestions" required>
+                <datalist id="design-suggestions"></datalist><br><br>
 
                 <label for="item-colour">Colour:</label>
-                <input type="text" id="item-colour" name="item-colour" required><br><br>
+                <input type="text" id="item-colour" name="item-colour" list="colour-suggestions" required>
+                <datalist id="colour-suggestions"></datalist><br><br>
 
                 <label for="current-length">Roll Length (m):</label> <!-- Changed to Roll Length -->
                 <input type="number" id="current-length" name="current-length" step="any" required><br><br>

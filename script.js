@@ -667,6 +667,40 @@ async function handleDeleteItem() {
     }
 }
 
+// --- Populate Suggestions ---
+async function populateSuggestions() {
+    const nameSuggestions = document.getElementById('name-suggestions');
+    const designSuggestions = document.getElementById('design-suggestions');
+    const colourSuggestions = document.getElementById('colour-suggestions');
+
+    const snapshot = await inventoryCollection.get();
+    const data = snapshot.docs.map(doc => doc.data());
+
+    const names = new Set();
+    const designs = new Set();
+    const colours = new Set();
+
+    data.forEach(item => {
+        if (item.name) names.add(item.name);
+        if (item.design) designs.add(item.design);
+        if (item.colour) colours.add(item.colour);
+    });
+
+    populateDatalist(nameSuggestions, names);
+    populateDatalist(designSuggestions, designs);
+    populateDatalist(colourSuggestions, colours);
+}
+
+function populateDatalist(datalist, items) {
+    datalist.innerHTML = '';
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item;
+        datalist.appendChild(option);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', populateSuggestions);
 
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
