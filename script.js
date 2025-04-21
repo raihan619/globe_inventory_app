@@ -785,6 +785,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.querySelector('.modal .close-btn');
     const inventoryListDiv = document.getElementById('inventory-list'); // Get inventory list container
     const deleteItemBtn = document.getElementById('delete-item-btn'); // Get delete button
+    const cleanupDbBtn = document.getElementById('cleanup-db-btn'); // Get cleanup button
+    const exportDbBtn = document.getElementById('export-db-btn'); // Get export button
 
 
     // --- Add Item Form: "Is Full Roll?" Checkbox Listener ---
@@ -1069,4 +1071,107 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- End Edit Modal Listeners ---
 
+    // --- Cleanup Inventory DB Listener ---
+    if (cleanupDbBtn) {
+        cleanupDbBtn.addEventListener('click', cleanupInventoryDB);
+    }
+    // --- End Cleanup Inventory DB Listener ---
+
+    // --- Export Inventory DB Listener ---
+    if (exportDbBtn) {
+        exportDbBtn.addEventListener('click', exportInventoryToCSV);
+    }
+    // --- End Export Inventory DB Listener ---
+
 }); // End DOMContentLoaded
+
+// --- Cleanup Inventory DB Functionality ---
+async function cleanupInventoryDB() {
+    try {
+        const snapshot = await inventoryCollection.get();
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const groupedItems = {};
+
+        // Group items by Name-Design-Colour
+        data.forEach(item => {
+            const key = `${item.name}-${item.design}-${item.colour}`;
+            if (!groupedItems[key]) {
+                groupedItems[key] = [];
+            }
+            groupedItems[key].push(item);
+        });
+
+        const batch = db.batch();
+        const logDetails = [];
+
+        // Process each group
+        Object.keys(groupedItems).forEach(key => {
+            const items = groupedItems[key];
+            const outOfStockItems = items.filter(item => item.status === "Out of Stock");
+            const nonOutOfStockItems = items.filter(item => item.status !== "Out of Stock");
+
+            if (nonOutOfStockItems.length > 0) {
+                // Delete all "Out of Stock" items if there are other entries
+                outOfStockItems.forEach(item => {
+                    batch.delete(inventoryCollection.doc(item.id));
+                    logDetails.push(`Deleted Out of Stock item: ${item.name} - ${item.design} - ${item.colour} (ID: ${item.id})`);
+                });
+            } else if (outOfStockItems.length > 1) {
+                // Keep only one "Out of Stock" item if it's the only type
+                outOfStockItems.slice(1).forEach(item => {
+                    batch.delete(inventoryCollection.doc(item.id));
+                    logDetails.push(`Deleted duplicate Out of Stock item: ${item.name} - ${item.design} - ${item.colour} (ID: ${item.id})`);
+                });
+            }
+        });
+
+        await batch.commit();
+
+        // Log cleanup activity
+        await logActivity("Inventory Cleanup", logDetails.join("\n"));
+        alert("Inventory cleanup completed successfully.");
+    } catch (error) {
+        console.error("Error during inventory cleanup:", error);
+        alert("Error during inventory cleanup. Check console for details.");
+    }
+}
+
+// --- Export Inventory to CSV Functionality ---
+async function exportInventoryToCSV() {
+    try {
+        const snapshot = await inventoryCollection.get();
+        const data = snapshot.docs.map(doc => doc.data());
+
+        if (data.length === 0) {
+            alert("No inventory data to export.");
+            return;
+        }
+
+        // Prepare CSV data
+        const headers = ["Name", "Design", "Colour", "OriginalLength", "CurrentLength", "Status"];
+        const rows = data.map(item => [
+            item.name || "",
+            item.design || "",
+            item.colour || "",
+            item.originalLength || "",
+            item.currentLength || "",
+            item.status || ""
+        ]);
+
+        const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+
+        // Create a Blob and download link
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `inventory_export_${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+
+        alert("Inventory exported successfully.");
+    } catch (error) {
+        console.error("Error exporting inventory:", error);
+        alert("Error exporting inventory. Check console for details.");
+    }
+}
