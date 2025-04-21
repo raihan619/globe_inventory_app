@@ -1087,6 +1087,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Cleanup Inventory DB Functionality ---
 async function cleanupInventoryDB() {
+    const confirmation = confirm("The cleanup process will remove duplicate 'Out of Stock' entries and keep only one if no other entries exist for the same item. Do you want to proceed?");
+    if (!confirmation) {
+        alert("Cleanup process canceled.");
+        return;
+    }
+
     try {
         const snapshot = await inventoryCollection.get();
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
